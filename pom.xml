@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>io.qbilon</groupId>
+        <artifactId>application</artifactId>
+        <version>1.0.0-SNAPSHOT</version>
+    </parent>
+
+    <groupId>io.qbilon</groupId>
+    <artifactId>assembly</artifactId>
+    <packaging>karaf-assembly</packaging>
+    <name>QBILON :: Assembly</name>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.apache.karaf.features</groupId>
+            <artifactId>framework</artifactId>
+            <version>${karaf.version}</version>
+            <type>kar</type>
+        </dependency>
+        <!-- <dependency>
+            <groupId>org.apache.karaf.features</groupId>
+            <artifactId>framework</artifactId>
+            <version>${karaf.version}</version>
+            <classifier>features</classifier>
+            <type>xml</type>
+            <scope>runtime</scope>
+        </dependency> -->
+        <dependency>
+            <groupId>org.apache.karaf.features</groupId>
+            <artifactId>standard</artifactId>
+            <version>${karaf.version}</version>
+            <classifier>features</classifier>
+            <type>xml</type>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.qbilon</groupId>
+            <artifactId>featurerepo</artifactId>
+            <version>${project.version}</version>
+            <type>xml</type>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>${slf4j.version}</version>
+            <scope>provided</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.karaf.tooling</groupId>
+                <artifactId>karaf-maven-plugin</artifactId>
+                <extensions>true</extensions>
+                <configuration>
+                    <finalName>${project.artifactId}</finalName>
+                    
+                    <startupFeatures>
+                        <feature>qbilon-backend</feature>
+                        <feature>qbilon-frontend</feature>
+                    </startupFeatures>
+                    <bootFeatures>
+                        <feature>bundle</feature>
+                        <feature>config</feature>
+                        <feature>diagnostic</feature>
+                        <feature>feature</feature>
+                        <feature>jaas</feature>
+                        <feature>shell</feature>
+                        <feature>log</feature>
+                        <feature>management</feature>
+                        <feature>package</feature>
+                        <feature>shell-compat</feature>
+                        <feature>ssh</feature>
+                        <feature>system</feature>
+                        <feature>wrap</feature>
+                    </bootFeatures>
+                    <archiveTarGz>true</archiveTarGz>
+                    <archiveZip>false</archiveZip>
+                    <workDirectory>${project.build.directory}/assembly/karaf</workDirectory>
+                    <pathPrefix>karaf</pathPrefix>
+                    <writeProfiles>true</writeProfiles>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>com.google.cloud.tools</groupId>
+                <artifactId>jib-maven-plugin</artifactId>
+                <version>1.8.0</version>
+                <configuration>
+                    <allowInsecureRegistries>false</allowInsecureRegistries>
+                    <from>
+                        <image>adoptopenjdk/openjdk11:alpine-jre</image>
+                    </from>
+                    <to>
+                        <image>registry.gitlab.com/qbilon-io/qbilon-application/karaf-custom-distrib:${project.version}</image>
+                        <auth>
+                            <username>qbilon</username>
+                            <password>${env.CR_ACCESS_TOKEN}</password>
+                        </auth>
+                    </to>
+                    <container>
+                        <entrypoint>
+                            <entrypoint>/karaf/bin/karaf</entrypoint>
+                            <entrypoint>run</entrypoint>
+                        </entrypoint>
+                        <workingDirectory>/karaf</workingDirectory>
+                        <ports>
+                            <port>8101</port>
+                            <port>1099</port>
+                            <port>44444</port>
+                            <port>8181</port>
+                        </ports>
+                    </container>
+                    <extraDirectories>
+                        <paths>
+                            target/assembly
+                        </paths>
+                        <permissions>
+                            <permission>
+                                <file>/karaf/bin/karaf</file>
+                                <mode>755</mode>
+                            </permission>
+                        </permissions>
+                    </extraDirectories>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>
